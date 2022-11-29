@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+. ./scripts/utils/ansi --source-only
+
+read -r -d '' usage << EOT
+$(fg_col 33 USAGE):
+  migration <ARGUMENT> [OPTIONS]
+
+$(fg_col 33 ARGUMENT):
+  [run | revert]
+
+$(fg_col 33 OPTIONS):
+  -e [test | dev]   Which database to run/revert migrations on.
+                    'test' for knodis_test, 'dev' for knodis_dev.
+  -h                Display usage text.
+EOT
+
+if [[ "$@" =~ "-h" ]]; then
+  echo "$usage"
+  exit 0
+fi
+
+if [[ "$1" =~ (run|revert) ]]; then
+  action="$1"
+  shift
+else
+  echo "Invalid ARGUMENT."
+  exit 22
+fi
+
+while getopts "e:h" opt; do
+  case "$opt" in
+    "e")
+      if [[ "$OPTARG" =~ (test|dev) ]]; then
+        env="$OPTARG"
+      else
+        echo "Invalid argument for 'e'."
+        exit 22
+      fi
+    ;;
+    "h")
+      echo "$usage"
+      exit 0
+    ;;
+    *)
+      env="dev"
+    ;;
+  esac
+done
+
+case "$env" in
+  "test")
+    env_var=$(grep 'DATABASE_URL_TEST' .env)
+    sqlx migrate "$action" -D ${env_var/DATABASE_URL_TEST=/}
+  ;;
+  *)
+    sqlx migrate "$action"
+  ;;
+esac
+
+exit 0

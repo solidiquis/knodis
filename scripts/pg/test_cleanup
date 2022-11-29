@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+. ./scripts/utils/ansi --source-only
+
+read -r -d '' usage <<-EOT
+$(fg_col 33 USAGE):
+  migration [OPTIONS]
+
+$(fg_col 33 DESCRIPTION):
+  Truncates all tables from test database.
+
+$(fg_col 33 OPTIONS):
+  -h    Display usage text.
+EOT
+
+if [[ "$@" =~ "-h" ]]; then
+  echo "$usage"
+  exit 0
+fi
+
+db_var=$(grep DATABASE_URL_TEST .env)
+db_uri=${db_var/DATABASE_URL_TEST=/}
+
+read -r -d '' table_names <<-EOT
+SELECT table_name FROM information_schema.tables
+WHERE NOT table_name ILIKE '%_sqlx%'
+AND table_schema = 'public'
+EOT
+
+tables=$(psql "$db_uri" -t -c "$table_names")
+
+for i in ${tables[@]}; do
+  psql "$db_uri" -c "TRUNCATE \"$i\" RESTART IDENTITY CASCADE"
+done

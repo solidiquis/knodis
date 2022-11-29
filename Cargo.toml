@@ -1,0 +1,16 @@
+[package]
+name = "knodis"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.6" }
+dotenv = "0.15.0"
+email_address = "0.2.4"
+futures = "0.3.25"
+num_cpus = "1.14.0"
+sea-query = { version = "0.27.2", features = ["attr", "derive", "backend-postgres", "with-chrono"] }
+sqlx = { version = "0.6", features = [ "runtime-tokio-native-tls" , "postgres", "json", "chrono" ] }
+tokio = { version = "1", features = ["full"] }

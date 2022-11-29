@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+fg_col() {
+  printf "\e[$1m$2\e[0m"
+}
