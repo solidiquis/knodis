@@ -33,6 +33,7 @@ const DB_URL_ENV_VAR: &'static str = "DATABASE_URL";
 pub type PgPool = Pool<Postgres>;
 pub type PgConn = PoolConnection<Postgres>;
 
+#[derive(Clone)]
 pub struct Pg {
     pool: Pool<Postgres>
 }
