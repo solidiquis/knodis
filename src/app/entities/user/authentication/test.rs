@@ -25,8 +25,7 @@ async fn authenticate_via_pw() {
         if let Some(authenticated_user) = user {
             assert_eq!(new_user.id, authenticated_user.id);
         } else {
-            println!("Failed to authenticate user.");
-            assert!(false);
+            assert!(false, "Failed to authenticate user.");
         }
 
         Err::<User, UserBuilderError>(UserBuilderError::Rollback)
