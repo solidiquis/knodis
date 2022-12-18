@@ -1,14 +1,16 @@
+use futures::future::BoxFuture;
 use num_cpus;
 use sqlx::{
+    Connection,
     Error as SqlxError,
     pool::PoolConnection,
     Pool,
     Postgres,
     postgres::PgPoolOptions,
+    Transaction
 };
-use std::pin::Pin;
-use std::future::Future;
 use std::time::Duration;
+use crate::box_fut;
 
 pub mod funcs;
 pub mod query_builder;
@@ -60,16 +62,28 @@ impl Pg {
         self.pool.acquire().await
     }
 
-    pub async fn with_conn<F, T>(&self, mut op: F) -> Result<T, SqlxError>
-    where
-        F: for<'a> FnMut(&'a mut PgConn) -> Pin<Box<dyn Future<Output = Result<T, SqlxError>> + 'a>>
-    {
-        let mut conn = self.pool.acquire().await?;
-        op(&mut conn).await
-    }
-
     pub fn inner_pool(&self) -> &Pool<Postgres> {
         &self.pool
+    }
+
+    pub async fn transaction<F, T, E>(&self, op: F) -> Result<T, E>
+    where
+        T: Send,
+        E: From<SqlxError> + Send,
+        for<'c> F: FnOnce(&'c mut Transaction<'_, Postgres>) -> BoxFuture<'c, Result<T, E>> + Send + Sync,
+    {
+        let mut conn = self.acquire().await?;
+        conn.transaction(op).await
+    }
+
+    pub async fn with_conn<F, T, E>(&self, op: F) -> Result<T, E>
+    where
+        T: Send, 
+        E: From<SqlxError> + Send,
+        for<'c >F: FnOnce(&'c mut PgConn) -> BoxFuture<'c, Result<T, E>> + Send + Sync
+    {
+        let mut conn = self.acquire().await?;
+        op(&mut conn).await
     }
 
     #[cfg(not(test))]

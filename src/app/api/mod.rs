@@ -2,9 +2,11 @@ use axum::routing::{get, Router};
 use crate::internal::db::pg::Pg;
 use std::sync::Arc;
 
+/// Services that allow for direct interaction with entities i.e. `app::entities`.
 pub mod entities;
 
-pub async fn routes() -> Router<()> {
+/// Top-level router.
+pub async fn router() -> Router<()> {
     let shared_state = Arc::new(AppState::new().await);
 
     let router: Router<SharedAppState> = Router::new();
@@ -17,10 +19,13 @@ pub async fn routes() -> Router<()> {
     service
 }
 
+/// Stateful router. All nested and merged routers must be of this type.
 pub type AppRouter = Router<SharedAppState>;
 
+/// Shared application state.
 pub type SharedAppState = Arc<AppState>;
 
+/// Application state.
 #[derive(Clone)]
 pub struct AppState {
     pub pg_pool: Pg

@@ -1,15 +1,13 @@
 #[tokio::test]
 async fn test_user_builder() {
+    use crate::box_fut;
     use crate::internal::db::pg::Pg;
-    use sqlx::Connection;
     use super::{UserBuilder, UserBuilderError};
     use super::User;
 
-    let pool = Pg::new().await;
+    let pg = Pg::new().await;
 
-    let mut conn = pool.acquire().await.unwrap();
-
-    let _ = conn.transaction(|conn| Box::pin(async move {
+    let _ = pg.transaction(|conn| box_fut!({
         let user = UserBuilder::default()
             .email("cthulhu@ryleh.com").unwrap()
             .password("nyarlathotep123")

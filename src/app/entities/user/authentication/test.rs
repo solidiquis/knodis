@@ -1,16 +1,14 @@
 #[tokio::test]
 async fn authenticate_via_pw() {
+    use crate::box_fut;
     use crate::internal::db::pg::Pg;
-    use sqlx::Connection;
     use super::authenticate_via_pw;
     use super::super::builder::{UserBuilder, error::UserBuilderError};
     use super::super::User;
     
     let pg = Pg::new().await;
 
-    let mut conn = pg.acquire().await.unwrap();
-
-    let _ = conn.transaction(|conn| Box::pin(async move {
+    let _ = pg.with_conn(|conn| box_fut!({
         let username = "cthuwu";
         let password = "nyarlathotep123";
         let email = "cthulhu@ryleh.com";
@@ -27,6 +25,7 @@ async fn authenticate_via_pw() {
         if let Some(authenticated_user) = user {
             assert_eq!(new_user.id, authenticated_user.id);
         } else {
+            println!("Failed to authenticate user.");
             assert!(false);
         }
 

@@ -1,7 +1,10 @@
 use dotenv::dotenv;
 use std::error::Error;
 
+/// Application business logic.
 mod app;
+
+/// Internal library code.
 mod internal;
 
 fn main() -> Result<(), Box<dyn Error>> {

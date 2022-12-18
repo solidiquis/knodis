@@ -1,4 +1,5 @@
 use sqlx::Error as SqlxError;
+use std::error::Error;
 use std::fmt::{self, Display, Debug};
 use sea_query::error::Error as SeaQueryError;
 
@@ -20,6 +21,8 @@ impl Display for UserBuilderError {
         }
     }
 }
+
+impl Error for UserBuilderError {}
 
 impl From<SqlxError> for UserBuilderError {
     fn from(e: SqlxError) -> Self {
