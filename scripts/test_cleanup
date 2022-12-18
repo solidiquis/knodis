@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-. ./scripts/utils/ansi --source-only
-
 read -r -d '' usage <<-EOT
 $(fg_col 33 USAGE):
   migration [OPTIONS]

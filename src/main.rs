@@ -1,63 +1,40 @@
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use dotenv::dotenv;
 use std::error::Error;
 
 /// Application business logic.
 mod app;
 
+/// CLI to run app or utility programs.
+mod cli;
+
 /// Internal library code.
 mod internal;
 
+/// App metadata
+mod metadata;
+
 fn main() -> Result<(), Box<dyn Error>> {
+    use cli::KnodisCommand;
+    use cli::programs::pg::{
+        bootstrap::bootstrap,
+        migrate::migrate,
+        Pg, PgCommand,
+    };
+
     dotenv().ok();
 
-    let cli = Knodis::parse();
+    let cli = cli::Knodis::parse();
 
     match cli.command {
-        None => commands::server::run(),
+        None => cli::programs::server::run(),
         Some(cmd) => match cmd {
-            Command::Run => commands::server::run(),
-            Command::Routes => commands::routes::debug()
+            KnodisCommand::Run => cli::programs::server::run(),
+            KnodisCommand::Routes => cli::programs::routes::debug(),
+            KnodisCommand::Pg(Pg { command }) => match command {
+                PgCommand::Bootstrap(args) => Ok(bootstrap(args)?),
+                PgCommand::Migrate(args) => Ok(migrate(args)?),
+            }
         }
     }
 }
-
-#[derive(Parser)]
-#[command(name = "Knodis")]
-#[command(about = "Collection of Knodis utilities.", long_about = None)]
-struct Knodis {
-    #[command(subcommand)]
-    command: Option<Command> 
-}
-
-#[derive(Subcommand)]
-enum Command {
-    /// Display all routes.
-    Routes,
-
-    /// Runs the app server.
-    Run
-}
-
-/// CLI subcommands.
-pub mod commands {
-    /// Run the application server.
-    pub mod server {
-        pub fn run() -> Result<(), Box<dyn std::error::Error>> {
-            let runtime = crate::internal::runtime::init()?;
-            runtime.block_on(async { crate::app::run().await });
-            Ok(())
-        }
-    }
-
-    /// Debug-print the application router.
-    pub mod routes {
-        pub fn debug() -> Result<(), Box<dyn std::error::Error>> {
-            let runtime = crate::internal::runtime::init()?;
-            let router = runtime.block_on(async { crate::app::api::router().await });
-            println!("{:?}", router);
-            Ok(())
-        }
-    }
-}
-
