@@ -20,7 +20,7 @@ where
                 Expr::col(UserIden::Password).eq(
                     Func::cust(funcs::Crypt).args([
                         Expr::val(plain_text_pw),
-                        Expr::tbl(UserIden::Table, UserIden::Password)
+                        Expr::col(UserIden::Password)
                     ])
                 )
             )
