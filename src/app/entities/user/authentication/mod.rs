@@ -6,7 +6,7 @@ use super::{User, UserIden};
 #[cfg(test)]
 mod test;
 
-/// Authenticates a user via password, using stored Postgres procedure. See `crate::internal::db::pg::funcs::AuthenticationViaPw`.
+/// Authenticates a user via password, using Postgres module, pgcrypto.
 pub async fn authenticate_via_pw<T>(conn: &mut T, username: &str, plain_text_pw: &str) -> Option<User>
 where
     for<'c> &'c mut T: Executor<'c, Database = Postgres>
