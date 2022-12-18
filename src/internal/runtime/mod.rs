@@ -4,13 +4,15 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use tokio::runtime::{Builder, Runtime};
 
-/// Suitable for blocking or CPU-bound operations.
+/// Suitable for blocking IO or CPU-bound operations. The amount of CPU-bound tasks throughout the
+/// application should be kept relatively small.
 pub use tokio::task::spawn_blocking;
 
-/// Suitable for operations with await points.
+/// Suitable for spawning new task that is submitted immediately to executor without needing to
+/// await it.
 pub use tokio::task::spawn;
 
-/// Suitable if wanting to run blocking code in current thread.
+/// Suitable if wanting to run blocking code in current thread right away.
 pub use tokio::task::block_in_place;
 
 static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
