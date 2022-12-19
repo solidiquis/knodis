@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let subscriber = tracing_subscriber::Registry::default()
         .with(general_layer);
 
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+    tracing::subscriber::set_global_default(subscriber)?;
 
     let cli = cli::Knodis::parse();
 
