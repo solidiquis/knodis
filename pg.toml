@@ -1,0 +1,16 @@
+# All time fields are in seconds
+
+[development]
+host = "localhost"
+port = 5432
+dbname = "knodis-dev"
+user = "alllmer"
+password = "fearandhunger809"
+sslmode = "disable"
+
+[development.pool_options]
+acquire_timeout = 5
+max_lifetime = 1800
+idle_timeout = 600
+max_connections = 250
+min_connections_per_cpu = 5
